@@ -43,25 +43,25 @@ dialog.matches('SaludarEmpezar', function (session, results) {
 dialog.matches('OrdenarPedido', [
     function (session, args, next) {
         //builder.Prompts.text(session, '¿A dónde envío tu pedido?');
-        const pizzas = ['Carbonara', 'Barbacoa', 'Margarita', 'Pepperoni', 'Especialidad'];
+        session.conversationData.pizzas = ['Carbonara', 'Barbacoa', 'Margarita', 'Pepperoni', 'Especialidad'];
         const entityPizza = builder.EntityRecognizer.findEntity(args.entities, 'producto');
         var match = null;
         session.conversationData.product = null;
 
         if (entityPizza) {
-            match = builder.EntityRecognizer.findBestMatch(pizzas, entityPizza.entity);
+            match = builder.EntityRecognizer.findBestMatch(session.conversationData.pizzas, entityPizza.entity);
             session.conversationData.product = match;
         }
     
         if (!match) {
-            builder.Prompts.choice(session, 'Ahora mismo tenemos estas pizzas disponibles, ¿Cual te gustaría probar?', pizzas, { listStyle :  builder.ListStyle.button });
-            match = builder.EntityRecognizer.findBestMatch(pizzas, entityPizza.entity);
-            session.conversationData.product = match;
+            builder.Prompts.choice(session, 'Ahora mismo tenemos estas pizzas disponibles, ¿Cual te gustaría probar?', session.conversationData.pizzas, { listStyle :  builder.ListStyle.button });
         } else {
             next({  response: match });
         }
     },
     function(session, args){
+        match = builder.EntityRecognizer.findBestMatch(session.conversationData.pizzas, args.response.entity);
+        session.conversationData.product = match.entity;
         session.beginDialog('/preguntarLugar');
     },
     function (session, results) {

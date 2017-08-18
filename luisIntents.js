@@ -1,6 +1,7 @@
+require('dotenv-extended').load();
+
 var restify = require('restify');
 var builder = require('botbuilder');
-var dotenv = require('dotenv');
 
 // Levantar restify
 var server = restify.createServer();
@@ -10,12 +11,14 @@ server.listen(process.env.port || process.env.PORT || 3978, function () {
 
 // No te preocupes por estas credenciales por ahora, luego las usaremos para conectar los canales.
 var connector = new builder.ChatConnector({
-    appId: '9347a85f-4e08-4753-862a-dde204b8d9de',
-    appPassword: 'nE1aPesCjtin8sioA66YedS'
+    appId: process.env.MICROSOFT_APP_ID, 
+    appPassword: process.env.MICROSOFT_APP_PASSWORD
 });
 
 // Ahora utilizamos un UniversalBot
-var bot = new builder.UniversalBot(connector);
+var bot = new builder.UniversalBot(connector, function(session){
+    session.send('Bienvenido a la banca virtual. Envía \'Ayuda\' si tienes dudas.')
+});
 server.post('/api/messages', connector.listen());
 
 // Para utilizar variables de entorno
@@ -25,8 +28,7 @@ let luisApp = process.env.LUIS_APP;
 let luisKey = process.env.LUIS_KEY;
 
 // Crear un procesador LUIS que apunte a nuestro modelo en el root (/)
-//https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/0c87a01b-0dcc-4685-a609-3a0194098f11?subscription-key=92ec7be2befd446cad77420aabb87a33&timezoneOffset=-240&verbose=true&q=
-var model = `https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/${luisApp}?subscription-key=${luisKey}&timezoneOffset=-240&verbose=true`;
+var model = process.env.LUIS_MODEL_URL;
 
 var recognizer = new builder.LuisRecognizer(model);
 var dialog = new builder.IntentDialog({ recognizers: [recognizer] });

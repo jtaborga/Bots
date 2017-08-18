@@ -2,6 +2,7 @@ require('dotenv-extended').load();
 
 var restify = require('restify');
 var builder = require('botbuilder');
+var moment = require('moment');
 
 // Levantar restify
 var server = restify.createServer();
@@ -31,18 +32,57 @@ var model = process.env.LUIS_MODEL_URL;
 
 var recognizer = new builder.LuisRecognizer(model);
 var dialog = new builder.IntentDialog({ recognizers: [recognizer] });
-bot.dialog('/', dialog, function(session){
-    session.send('Bienvenido a la banca virtual. Envía \'Ayuda\' si tienes dudas.')
+
+bot.dialog('/', dialog);
+
+dialog.matches('SaludarEmpezar', function (session, results) {
+    session.send('Hola ¿En que te puedo ayudar?');
 });
 
 // Esta función se ejecuta cuando el Intent == ordenarTaxi
 dialog.matches('OrdenarPedido', [
     function (session, args, next) {
         //builder.Prompts.text(session, '¿A dónde envío tu pedido?');
+        const pizzas = ['Carbonara', 'Barbacoa', 'Margarita', 'Especialidad'];
+        const entityPizza = builder.EntityRecognizer.findEntity(args.entities, 'producto');
+        var match = builder.EntityRecognizer.findBestMatch(pizzas, entityPizza.entity);
+        session.conversationData.product = match.entity;
+
+        if (entityPizza) {
+            match = builder.EntityRecognizer.findBestMatch(pizzas, entityPizza.entity);
+        }
+    
+        if (!match) {
+            builder.Prompts.choice(session, 'Ahora mismo tenemos estas pizzas disponibles, ¿Cual te gustaría probar?', pizzas);
+        } else {
+            next({ response: match });
+        }
+    },
+    function(session, args){
         session.beginDialog('/preguntarLugar');
+    },
+    function (session, results) {
+        if (results.response) {
+            const time = moment().add(30, 'm');
+    
+            session.dialogData.time = time.format('HH:mm');
+            session.send("De acuerdo, tu pizza %s llegará a las %s.", session.conversationData.product, session.dialogData.time);
+        } else {
+            session.send('De acuerdo, si no te gustan, intenta la próxima vez :)');
+        }
     },
     function(session, args) {
         session.send(`Enviando el pedido a tu dirección **${args.response}**`);
+    }
+]);
+
+dialog.matches('AyudaConsulta', [
+    function (session, args, next) {
+        //builder.Prompts.text(session, '¿A dónde envío tu pedido?');
+        session.beginDialog('ayuda');
+    },
+    function(session, args) {
+        builder.Prompts.choice(session, "Elije 1 Opción:", 'Flip A Coin|Roll Dice|Magic 8-Ball|Quit');
     }
 ]);
 
@@ -54,7 +94,7 @@ dialog.matches('ObtenerDireccion', [
 
 dialog.matches('CancelarPedido', [
     function (session, args, next) {
-        session.send('Ok, cancelaré tu Pedido.')
+        session.send('Ok, cancelaré tu Pedido.');
     }
 ]);
 
@@ -66,6 +106,31 @@ bot.dialog('/preguntarLugar', [
         session.endDialogWithResult(results);
     }
 ]);
+
+bot.dialog('ayuda', [
+    function (session) {
+        builder.Prompts.choice(session, "Elije 1 Opción:", 'Ordenar|Cancelar');
+    },
+    function (session, results) {
+        switch (results.response.index) {
+            case 0:
+                session.endDialog();
+                break;
+            case 1:
+                session.beginDialog('CancelarPedido');
+                break;
+            default:
+                session.endDialog();
+                break;
+        }
+    }
+]).triggerAction({ matches: /^ayuda/i });
+
+bot.dialog('salir', [
+    function(session){
+        session.send('Ok, cancelaré tu Pedido.');
+    }
+]).triggerAction({ matches: /^cancelar/i });
 
 //Este es el Default, cuando LUIS no entendió la consulta.
 dialog.onDefault(builder.DialogAction.send("No entendí. Me lo decís de nuevo pero de otra manera, por favor?"));

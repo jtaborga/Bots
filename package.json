@@ -1,0 +1,17 @@
+{
+  "name": "Bots",
+  "version": "1.0.0",
+  "description": "",
+  "main": "holaBot.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "botbuilder": "^3.9.0",
+    "dotenv": "^4.0.0",
+    "restify": "^5.1.0"
+  }
+}

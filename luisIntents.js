@@ -45,18 +45,20 @@ dialog.matches('OrdenarPedido', [
         //builder.Prompts.text(session, '¿A dónde envío tu pedido?');
         const pizzas = ['Carbonara', 'Barbacoa', 'Margarita', 'Pepperoni', 'Especialidad'];
         const entityPizza = builder.EntityRecognizer.findEntity(args.entities, 'producto');
-        var match = builder.EntityRecognizer.findBestMatch(pizzas, entityPizza.entity);
-        session.conversationData.product = '';
+        var match = null;
+        session.conversationData.product = null;
 
         if (entityPizza) {
             match = builder.EntityRecognizer.findBestMatch(pizzas, entityPizza.entity);
-            session.conversationData.product = match.entity;
+            session.conversationData.product = match;
         }
     
         if (!match) {
-            builder.Prompts.choice(session, 'Ahora mismo tenemos estas pizzas disponibles, ¿Cual te gustaría probar?', pizzas);
+            builder.Prompts.choice(session, 'Ahora mismo tenemos estas pizzas disponibles, ¿Cual te gustaría probar?', pizzas, { listStyle :  builder.ListStyle.button });
+            match = builder.EntityRecognizer.findBestMatch(pizzas, entityPizza.entity);
+            session.conversationData.product = match;
         } else {
-            next({ response: match });
+            next({  response: match });
         }
     },
     function(session, args){

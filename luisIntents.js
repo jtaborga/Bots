@@ -43,13 +43,14 @@ dialog.matches('SaludarEmpezar', function (session, results) {
 dialog.matches('OrdenarPedido', [
     function (session, args, next) {
         //builder.Prompts.text(session, '¿A dónde envío tu pedido?');
-        const pizzas = ['Carbonara', 'Barbacoa', 'Margarita', 'Especialidad'];
+        const pizzas = ['Carbonara', 'Barbacoa', 'Margarita', 'Pepperoni', 'Especialidad'];
         const entityPizza = builder.EntityRecognizer.findEntity(args.entities, 'producto');
         var match = builder.EntityRecognizer.findBestMatch(pizzas, entityPizza.entity);
-        session.conversationData.product = match.entity;
+        session.conversationData.product = '';
 
         if (entityPizza) {
             match = builder.EntityRecognizer.findBestMatch(pizzas, entityPizza.entity);
+            session.conversationData.product = match.entity;
         }
     
         if (!match) {

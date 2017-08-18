@@ -2,10 +2,10 @@
   "name": "Bots",
   "version": "1.0.0",
   "description": "",
-  "main": "holaBot.js",
+  "main": "luisIntents.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start" : "node luisIntents.js"
+    "start": "node luisIntents.js"
   },
   "keywords": [],
   "author": "",
@@ -13,6 +13,7 @@
   "dependencies": {
     "botbuilder": "^3.9.0",
     "dotenv": "^4.0.0",
+    "dotenv-extended": "^2.0.1",
     "restify": "^5.1.0"
   }
 }

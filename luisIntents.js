@@ -16,13 +16,12 @@ var connector = new builder.ChatConnector({
 });
 
 // Ahora utilizamos un UniversalBot
-var bot = new builder.UniversalBot(connector, function(session){
-    session.send('Bienvenido a la banca virtual. Envía \'Ayuda\' si tienes dudas.')
-});
+var bot = new builder.UniversalBot(connector);
+
 server.post('/api/messages', connector.listen());
 
 // Para utilizar variables de entorno
-dotenv.config(); 
+//dotenv.config(); 
 
 let luisApp = process.env.LUIS_APP;
 let luisKey = process.env.LUIS_KEY;
@@ -32,7 +31,9 @@ var model = process.env.LUIS_MODEL_URL;
 
 var recognizer = new builder.LuisRecognizer(model);
 var dialog = new builder.IntentDialog({ recognizers: [recognizer] });
-bot.dialog('/', dialog);
+bot.dialog('/', dialog, function(session){
+    session.send('Bienvenido a la banca virtual. Envía \'Ayuda\' si tienes dudas.')
+});
 
 // Esta función se ejecuta cuando el Intent == ordenarTaxi
 dialog.matches('OrdenarPedido', [

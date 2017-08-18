@@ -3,3 +3,4 @@ node-modules/*
 .code
 holaBot.js
 holaWeb.js
+*.log
